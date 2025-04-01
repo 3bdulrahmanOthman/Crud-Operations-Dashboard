@@ -1,12 +1,14 @@
 import { create } from "zustand";
-import { ProductProps } from "@/types";
 import { immer } from "zustand/middleware/immer";
-import { ProductService } from "@/lib/api/products";
+import { ProductService } from "@/lib/services/product";
+import { ProductProps } from "@/types";
 
 interface ProductState {
   products: ProductProps[];
+  productsByCategory: Record<string, ProductProps[]>;
   isLoading: boolean;
   fetchProducts: () => Promise<void>;
+  fetchProductsByCategory: (categoryId: string) => Promise<void>;
   addProduct: (product: Omit<ProductProps, "id">) => Promise<void>;
   updateProduct: (product: ProductProps) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
@@ -15,18 +17,30 @@ interface ProductState {
 export const useProductStore = create<ProductState>()(
   immer((set) => ({
     products: [],
+    productsByCategory: {},
     isLoading: false,
 
     fetchProducts: async () => {
       set({ isLoading: true });
       try {
         const products = await ProductService.fetchAll();
+        set({ products, isLoading: false });
+      } catch (error) {
+        console.error("❌ Error fetching products:", error);
+        set({ isLoading: false });
+      }
+    },
+
+    fetchProductsByCategory: async (categoryId: string) => {
+      set({ isLoading: true });
+      try {
+        const products = await ProductService.fetchByCategory(categoryId);
         set((state) => {
-          state.products = products;
+          state.productsByCategory[categoryId] = products;
           state.isLoading = false;
         });
       } catch (error) {
-        console.error("❌ Error fetching products:", error);
+        console.error(`❌ Error fetching products for category ${categoryId}:`, error);
         set({ isLoading: false });
       }
     },

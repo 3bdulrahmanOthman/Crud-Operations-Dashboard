@@ -28,7 +28,7 @@ interface ProfileMenuProps {
   user: UserProps;
   logout: () => void;
   extraMenuItems?: DropdownMenuItemConfig[];
-  loading: boolean;
+  loading?: boolean;
 }
 
 const ProfileMenu = ({ user, logout, extraMenuItems, loading }: ProfileMenuProps) => {
@@ -103,7 +103,7 @@ const ProfileMenu = ({ user, logout, extraMenuItems, loading }: ProfileMenuProps
 
 export default ProfileMenu;
 
-const UserProfile = ({ user, loading }: { user: UserProps, loading: boolean; }) => {
+const UserProfile = ({ user, loading }: { user: UserProps, loading?: boolean; }) => {
   return (
     <div className="flex items-center gap-2">
       {loading ? (

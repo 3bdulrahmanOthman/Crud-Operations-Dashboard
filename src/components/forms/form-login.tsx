@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
 import { loginSchema } from "@/lib/validation/auth";
 
 import { Button } from "@/components/ui/button";
@@ -30,12 +29,13 @@ import {
 import { Icons } from "../icons";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { PasswordInput } from "../password-input";
+import { signIn } from "next-auth/react";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -46,27 +46,20 @@ export default function LoginForm() {
   });
 
   const onSubmit = (data: LoginFormValues) => {
-    setIsLoading(true);
-
-    toast.promise(
-      signIn("credentials", {
-        redirect: false,
+    startTransition(() => {
+      toast.promise(signIn("credentials", {
         email: data.email,
         password: data.password,
-      }),
-      {
+        redirect: false,
+      }), {
         loading: "Logging in...",
         success: () => {
-          router.push("/dashboard");
-          router.refresh();
+          router.replace("/dashboard");
           return "Login successful!";
         },
         error: "Invalid email or password",
-        finally: () => {
-          setIsLoading(false);
-        },
-      }
-    );
+      });
+    });
   };
 
   return (
@@ -117,8 +110,8 @@ export default function LoginForm() {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? (
                 <>
                   <Icons.spinner className="mr-2 size-4 animate-spin" />
                   <span>Login...</span>

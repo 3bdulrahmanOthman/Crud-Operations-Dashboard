@@ -1,4 +1,4 @@
-import { ProductsTable } from "@/components/dashboard/products/product-table";
+import { ProductsTable } from "@/components/dashboard/products-table";
 import PageHeader from "@/components/page-header";
 import { Shell } from "@/components/shell";
 

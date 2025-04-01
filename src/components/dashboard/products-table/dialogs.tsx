@@ -1,24 +1,27 @@
 import { DataTableDeleteDialog } from "@/components/data-table";
 import { ProductProps } from "@/types";
 import { slugify } from "@/lib/utils";
-import { ProductManageDialog } from "./product-table-manage-dialog";
-import ProductViewModal from "./product-table-model.dialog";
+import ProductViewModal from "./view-model";
 import React from "react";
 import { useDialogStore } from "@/store/dialogs";
 import { useProductStore } from "@/store/products";
+import { ManageDataEntries } from "./manage-row-entries";
+import { useCategoryStore } from "@/store/categories";
 
-export function ProductDialogs() {
+export function Dialogs() {
   const { open, data, close, setOpen } = useDialogStore();
   const { deleteProduct, updateProduct, addProduct } = useProductStore();
+  const { categories } = useCategoryStore();
 
-  if(!open) return null;
-  
+  if (!open) return null;
+
   return (
     <>
-      <ProductManageDialog
+      <ManageDataEntries
         open={open === "edit" || open === "add"}
         onOpenChange={close}
         product={data || undefined}
+        categories={categories || undefined}
         onAction={async (values) => {
           if (open === "edit" && data) {
             await updateProduct({ ...data, ...values });

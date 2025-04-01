@@ -33,41 +33,42 @@ import { useForm } from "react-hook-form";
 
 export type ProductFormValues = z.infer<typeof productSchema>;
 
-interface ProductManageDialogProps {
+interface ManageDataEntriesProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product?: ProductProps;
+  categories?: CategoryProps[];
   onAction: (values: ProductFormValues) => Promise<void>;
   loading?: boolean;
 }
 
-export function ProductManageDialog({
+export function ManageDataEntries({
   open,
   onOpenChange,
   product,
+  categories,
   onAction,
   loading,
-}: ProductManageDialogProps) {
+}: ManageDataEntriesProps) {
   const isEdit = !!product;
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: isEdit
-    ? {
-        ...product,
-        categoryId: Number(product.category?.id),
-        isEdit: !!product,
-      }
-    : {
-        title: "",
-        price: 0,
-        description: "",
-        categoryId: 1,
-        images: [],
-        isEdit: false,
-      },
+      ? {
+          ...product,
+          categoryId: Number(product.category?.id),
+          isEdit: !!product,
+        }
+      : {
+          title: "",
+          price: 0,
+          description: "",
+          categoryId: 1,
+          images: [],
+          isEdit: false,
+        },
   });
-  
 
   const onSubmit = async (values: ProductFormValues) => {
     toast.promise(onAction(values), {
@@ -101,7 +102,7 @@ export function ProductManageDialog({
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh] pr-4">
-          <Form {...form}> 
+          <Form {...form}>
             <form
               id="product-form"
               onSubmit={form.handleSubmit(onSubmit)}
@@ -196,19 +197,10 @@ export function ProductManageDialog({
                         defaultValue={String(field.value)}
                         onValueChange={(value) => field.onChange(Number(value))}
                         placeholder="Select Category"
-                        items={
-                          Array.isArray(product?.category)
-                            ? product.category.map((c: CategoryProps) => ({
-                                label: c.name,
-                                value: String(c.id),
-                              }))
-                            : [
-                                {
-                                  label: "Default Category",
-                                  value: "1",
-                                },
-                              ]
-                        }
+                        items={(categories ?? []).map((c: CategoryProps) => ({
+                          label: c.name,
+                          value: String(c.id),
+                        }))}
                       />
                     </FormControl>
                     <FormMessage />

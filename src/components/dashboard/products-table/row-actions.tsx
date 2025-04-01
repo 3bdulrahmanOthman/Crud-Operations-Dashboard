@@ -3,7 +3,7 @@ import { useDialogStore } from "@/store/dialogs";
 import { ProductProps } from "@/types";
 import { toast } from "sonner";
 
-export const ProductActions = ({ product }: { product: ProductProps }) => {
+export const RowActions = ({ product }: { product: ProductProps }) => {
   const { setOpen } = useDialogStore();
     const options = [
       {

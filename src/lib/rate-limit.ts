@@ -1,15 +1,30 @@
-import { Ratelimit } from "@upstash/ratelimit" // for deno: see above
-import { Redis } from "@upstash/redis" // see below for cloudflare and fastly adapters
+import { Redis } from "@upstash/redis"
+import { Ratelimit } from "@upstash/ratelimit"
+import { UploadThingError } from "uploadthing/server"
 
-export const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  // Rate limit to 10 requests per 10 seconds
-  limiter: Ratelimit.slidingWindow(10, "10 s"),
-  analytics: true,
-  /**
-   * Optional prefix for the keys used in redis. This is useful if you want to share a redis
-   * instance with other applications and want to avoid key collisions. The default prefix is
-   * "@upstash/ratelimit"
-   */
-  prefix: "uploader/ratelimit",
-})
+export async function rateLimit({
+  id,
+  limit = 10,
+  timeframe = 60, // in seconds
+}: {
+  id: string
+  limit?: number
+  timeframe?: number
+}) {
+  const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(limit, `${timeframe}s`),
+    analytics: true,
+    prefix: "uploader/ratelimit",
+  })
+
+  const { success, limit: rateLimitInfo, reset, remaining } = await ratelimit.limit(id)
+
+  if (!success) {
+    const retryAfter = Math.ceil((reset - Date.now()) / 1000)
+    throw new UploadThingError(`Rate limit exceeded. Try again in ${retryAfter} seconds. Remaining: ${remaining}/${rateLimitInfo}`)
+  }
+
+  return { success, remaining, limit: rateLimitInfo }
+}
+

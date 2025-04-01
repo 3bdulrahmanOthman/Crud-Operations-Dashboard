@@ -4,32 +4,10 @@ import { DataTableColumnHeader } from "@/components/data-table";
 import { ProductProps } from "@/types";
 import { formatDate, formatPrice } from "@/lib/utils";
 import LongText from "@/components/long-text";
-import { ProductActions } from "./product-table-actions";
 import Image from "next/image";
+import { RowActions } from "./row-actions";
 
-export const ProductColumns: ColumnDef<ProductProps>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+export const columns: ColumnDef<ProductProps>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => (
@@ -86,7 +64,7 @@ export const ProductColumns: ColumnDef<ProductProps>[] = [
       </span>
     ),
     filterFn: (row, id, value) => {
-      return value.includes(row.original.category?.name);
+      return value.includes(row.original.category?.id);
     },
   },
   {
@@ -122,7 +100,7 @@ export const ProductColumns: ColumnDef<ProductProps>[] = [
     id: "actions",
     cell: ({ row }) => {
       const product = row.original;
-      return <ProductActions product={product} />;
+      return <RowActions product={product} />;
     },
   },
 ];

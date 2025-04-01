@@ -1,8 +1,8 @@
-import React from "react";
 import { Icons } from "@/components/icons";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { LucideProps } from "lucide-react";
+import { createElement } from "react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -15,7 +15,7 @@ export const RenderIcon = ({
   icon?: keyof typeof Icons;
 } & LucideProps) => {
   const Icon = icon ? Icons[icon] : undefined;
-  return Icon ? React.createElement(Icon, props) : null;
+  return Icon ? createElement(Icon, props) : null;
 };
 
 export function formatPrice(
@@ -27,7 +27,7 @@ export function formatPrice(
     currency: opts.currency ?? "USD",
     notation: opts.notation ?? "compact",
     ...opts,
-  }).format(Number(price))
+  }).format(Number(price));
 }
 
 export function formatNumber(
@@ -40,19 +40,21 @@ export function formatNumber(
     minimumFractionDigits: opts.minimumFractionDigits ?? 0,
     maximumFractionDigits: opts.maximumFractionDigits ?? 2,
     ...opts,
-  }).format(Number(number))
+  }).format(Number(number));
 }
 
 export function formatDate(
   date: Date | string | number | undefined,
   opts: Intl.DateTimeFormatOptions = {}
 ) {
-  return date ? new Intl.DateTimeFormat("en-US", {
-    month: opts.month ?? "long",
-    day: opts.day ?? "numeric",
-    year: opts.year ?? "numeric",
-    ...opts,
-  }).format(new Date(date)) : "N/A";
+  return date
+    ? new Intl.DateTimeFormat("en-US", {
+        month: opts.month ?? "long",
+        day: opts.day ?? "numeric",
+        year: opts.year ?? "numeric",
+        ...opts,
+      }).format(new Date(date))
+    : "N/A";
 }
 
 export function formatBytes(
@@ -60,15 +62,13 @@ export function formatBytes(
   decimals = 0,
   sizeType: "accurate" | "normal" = "normal"
 ) {
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
-  const accurateSizes = ["Bytes", "KiB", "MiB", "GiB", "TiB"]
-  if (bytes === 0) return "0 Byte"
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const accurateSizes = ["Bytes", "KiB", "MiB", "GiB", "TiB"];
+  if (bytes === 0) return "0 Byte";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / Math.pow(1024, i)).toFixed(decimals)} ${
-    sizeType === "accurate"
-      ? (accurateSizes[i] ?? "Bytest")
-      : (sizes[i] ?? "Bytes")
-  }`
+    sizeType === "accurate" ? accurateSizes[i] ?? "Bytest" : sizes[i] ?? "Bytes"
+  }`;
 }
 export function toSentenceCase(str: string) {
   return str
@@ -93,7 +93,9 @@ export function unslugify(str: string) {
 }
 
 export function isMacOs() {
-  if (typeof window === "undefined") return false
+  if (typeof window === "undefined") return false;
 
-  return window.navigator.userAgent.includes("Mac")
+  return window.navigator.userAgent.includes("Mac");
 }
+
+

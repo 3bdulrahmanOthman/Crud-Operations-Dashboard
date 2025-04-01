@@ -1,23 +1,24 @@
 "use client";
 
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
-import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { showErrorToast } from "@/lib/handle-error";
+import { getErrorMessage } from "@/lib/handle-error";
 import { UserProps } from "@/types";
 import ProfileMenu from "../account-menu";
+import { signOut, useSession } from "next-auth/react";
 
 export function UserNav() {
-  const { user, logout, loading } = useAuth();
+  const { data: session, status } = useSession();
 
   const handleLogout = () => {
-    try {
-      logout();
-      toast.success("Logout successful");
-    } catch (error) {
-      showErrorToast(error);
-    }
-  }
+    toast.promise(signOut, {
+      loading: "Logging out...",
+      success: "Logout successful!",
+      error: (error) => {
+        return getErrorMessage(error);
+      },
+    });
+  };
 
   return (
     <SidebarMenu>
@@ -27,9 +28,9 @@ export function UserNav() {
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <ProfileMenu
-            user={user as UserProps}
+            user={session?.user as UserProps}
             logout={handleLogout}
-            loading={loading}
+            loading={status === "loading"}
           />
         </SidebarMenuButton>
       </SidebarMenuItem>

@@ -24,7 +24,7 @@ import {
 import { Icons } from "@/components/icons";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface ProductViewModalProps {
+interface ViewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product?: ProductProps;
@@ -33,14 +33,14 @@ interface ProductViewModalProps {
   onDelete: () => void;
 }
 
-export default function ProductViewModal({
+export default function ViewModal({
   open,
   onOpenChange,
   product,
   onClose,
   onEdit,
   onDelete,
-}: ProductViewModalProps) {
+}: ViewModalProps) {
   if (!product) return null;
 
   return (

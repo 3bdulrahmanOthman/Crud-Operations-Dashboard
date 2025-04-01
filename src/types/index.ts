@@ -3,6 +3,7 @@ import { Icons } from "@/components/icons";
 interface Options {
   label: string;
   value: string;
+  count?: number;
   icon?: keyof typeof Icons;
 }
 

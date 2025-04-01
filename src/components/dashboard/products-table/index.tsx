@@ -7,34 +7,48 @@ import {
   DataTableToolbar,
 } from "@/components/data-table";
 import { exportTableToCSV } from "@/lib/export";
-import { ProductColumns } from "./product-table-columns";
-import { memo, useEffect, useMemo } from "react";
+import { memo, useEffect } from "react";
 import { Icons } from "@/components/icons";
 import { useProductStore } from "@/store/products";
-import { ProductDialogs } from "./product-table-dialogs";
 import { useDialogStore } from "@/store/dialogs";
+import { columns } from "./columns";
+import { Dialogs } from "./dialogs";
+import { useCategoryStore } from "@/store/categories";
+import { CategoryProps } from "@/types";
+import { useUniqueOptions } from "@/hooks/useUniqueOptions";
 
 export const ProductsTable = memo(() => {
-  const { products, fetchProducts, isLoading } = useProductStore();
+  const {
+    products,
+    fetchProducts,
+    isLoading,
+    productsByCategory,
+    fetchProductsByCategory,
+  } = useProductStore();
+  const { categories, fetchCategories } = useCategoryStore();
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchCategories, fetchProducts]);
 
-  const productCategoryOptions = useMemo(() => {
-    const categoryMap = new Map<string, { label: string; value: string }>();
-
-    products.forEach((product) => {
-      if (product.category) {
-        const { id, name } = product.category;
-        if (!categoryMap.has(id)) {
-          categoryMap.set(id, { label: name, value: name });
-        }
-      }
+  useEffect(() => {
+    categories.forEach((category) => {
+      fetchProductsByCategory(category.id);
     });
+  }, [categories, fetchProductsByCategory]);
 
-    return Array.from(categoryMap.values());
-  }, [products]);
+  const uniqueCategoryOptions = useUniqueOptions<CategoryProps>(
+    categories,
+    (c: CategoryProps) =>
+      c
+        ? {
+            label: c.name,
+            value: c.id,
+            count: productsByCategory[c.id]?.length || 0,
+          }
+        : null
+  );
 
   if (isLoading) {
     return <DataTableSkeleton columnCount={6} />;
@@ -43,7 +57,7 @@ export const ProductsTable = memo(() => {
   return (
     <>
       <DataTable
-        columns={ProductColumns}
+        columns={columns}
         data={products}
         toolbar={(table) => (
           <DataTableToolbar
@@ -54,7 +68,7 @@ export const ProductsTable = memo(() => {
                 {
                   id: "category",
                   title: "Category",
-                  options: productCategoryOptions,
+                  options: uniqueCategoryOptions,
                 },
               ]
             }
@@ -87,7 +101,7 @@ export const ProductsTable = memo(() => {
           </DataTableToolbar>
         )}
       />
-      <ProductDialogs />
+      <Dialogs />
     </>
   );
 });

@@ -1,12 +1,6 @@
-import LoginForm from "@/components/forms/form-login"
+import { redirect } from "next/navigation"
 
-export default async function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-muted/40">
-      <div className="w-full max-w-md">
-        <LoginForm />
-      </div>
-    </main>
-  )
+export default function Home() {
+  return redirect("/dashboard");
 }
 

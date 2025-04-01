@@ -82,4 +82,3 @@ export const useFileUploaderStore = create<FileUploaderState>((set) => ({
 
   setUploadedUrls: (urls) => set({ uploadedUrls: urls }),
 }))
-

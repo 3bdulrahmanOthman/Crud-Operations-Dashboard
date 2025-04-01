@@ -7,6 +7,11 @@ export const ProductService = {
     return data;
   },
 
+  async fetchByCategory(id: string): Promise<ProductProps[]> {
+    const { data } = await api.get(`/categories/${id}/products`);
+    return data;
+  },
+
   async create(product: Omit<ProductProps, "id">): Promise<ProductProps> {
     const { data } = await api.post("/products", product);
     return data;
