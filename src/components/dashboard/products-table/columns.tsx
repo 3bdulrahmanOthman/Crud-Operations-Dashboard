@@ -64,7 +64,7 @@ export const columns: ColumnDef<ProductProps>[] = [
       </span>
     ),
     filterFn: (row, id, value) => {
-      return value.includes(row.original.category?.id);
+      return value.includes(row.original.category?.id.toString());
     },
   },
   {

@@ -57,8 +57,8 @@ export function ManageDataEntries({
     defaultValues: isEdit
       ? {
           ...product,
-          categoryId: Number(product.category?.id),
-          isEdit: !!product,
+          categoryId: product.category?.id,
+          isEdit,
         }
       : {
           title: "",
@@ -66,11 +66,12 @@ export function ManageDataEntries({
           description: "",
           categoryId: 1,
           images: [],
-          isEdit: false,
+          isEdit,
         },
   });
 
   const onSubmit = async (values: ProductFormValues) => {
+    console.log("product", values)
     toast.promise(onAction(values), {
       loading: isEdit ? "Updating product..." : "Adding product...",
       success: () => `Product ${isEdit ? "updated" : "added"} successfully!`,
@@ -195,7 +196,8 @@ export function ManageDataEntries({
                       <SelectDropdown
                         className="w-full"
                         defaultValue={String(field.value)}
-                        onValueChange={(value) => field.onChange(Number(value))}
+                        onValueChange={(value) => {field.onChange(value) 
+                          console.log(value)}}
                         placeholder="Select Category"
                         items={(categories ?? []).map((c: CategoryProps) => ({
                           label: c.name,

@@ -1,5 +1,6 @@
 import api from "../axios";
-import { ProductProps } from "@/types";
+import { CategoryProps, ProductProps } from "@/types";
+import { CategoryService } from "./category";
 
 export const ProductService = {
   async fetchAll(): Promise<ProductProps[]> {
@@ -7,7 +8,7 @@ export const ProductService = {
     return data;
   },
 
-  async fetchByCategory(id: string): Promise<ProductProps[]> {
+  async fetchByCategory(id: CategoryProps["id"]): Promise<ProductProps[]> {
     const { data } = await api.get(`/categories/${id}/products`);
     return data;
   },
@@ -19,7 +20,10 @@ export const ProductService = {
 
   async update(product: ProductProps): Promise<ProductProps> {
     const { data } = await api.put(`/products/${product.id}`, product);
-    return data;
+
+    {/* Manually update category object because backend doesn't do it */}
+    const updatedCategory = await CategoryService.fetchById(product.categoryId)
+    return { ...data, category: updatedCategory };
   },
 
   async remove(id: string): Promise<void> {

@@ -44,7 +44,7 @@ export const ProductsTable = memo(() => {
       c
         ? {
             label: c.name,
-            value: c.id,
+            value: c.id.toString(),
             count: productsByCategory[c.id]?.length || 0,
           }
         : null

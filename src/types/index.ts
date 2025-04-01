@@ -32,14 +32,14 @@ interface ProductProps {
   description?: string;
   price: number;
   category?: CategoryProps;
-  categoryId: string;
+  categoryId: number;
   images: string[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 interface CategoryProps {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   image: string;
