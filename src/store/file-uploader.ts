@@ -21,6 +21,8 @@ interface FileUploaderState {
   reset: () => void
   removeFile: (url: string) => void
   setUploadedUrls: (urls: string[]) => void
+  clearError: () => void
+  clearRejectedFiles: () => void
 }
 
 export const useFileUploaderStore = create<FileUploaderState>((set) => ({
@@ -81,4 +83,9 @@ export const useFileUploaderStore = create<FileUploaderState>((set) => ({
     })),
 
   setUploadedUrls: (urls) => set({ uploadedUrls: urls }),
+
+  clearError: () => set({ error: null, status: "idle" }),
+
+  clearRejectedFiles: () => set({ rejectedFiles: [] }),
 }))
+

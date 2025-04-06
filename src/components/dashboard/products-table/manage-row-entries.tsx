@@ -28,8 +28,8 @@ import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/handle-error";
 import { productSchema } from "@/lib/validation/products";
 import { SelectDropdown } from "@/components/select-dropdown";
-import FileUploader from "../../ui/file-uploader";
 import { useForm } from "react-hook-form";
+import { FileUploader } from "@/components/ui/file-uploader";
 
 export type ProductFormValues = z.infer<typeof productSchema>;
 
@@ -71,7 +71,7 @@ export function ManageDataEntries({
   });
 
   const onSubmit = async (values: ProductFormValues) => {
-    console.log("product", values)
+    console.log("product", values);
     toast.promise(onAction(values), {
       loading: isEdit ? "Updating product..." : "Adding product...",
       success: () => `Product ${isEdit ? "updated" : "added"} successfully!`,
@@ -120,8 +120,10 @@ export function ManageDataEntries({
                       <FileUploader
                         onChange={field.onChange}
                         value={field.value}
+                        uploadEndpoint="productImage"
                         maxFiles={4}
-                        disabled={loading}
+                        maxSize={1}
+                        previewLayout="grid"
                       />
                     </FormControl>
                     <FormMessage />
@@ -196,8 +198,10 @@ export function ManageDataEntries({
                       <SelectDropdown
                         className="w-full"
                         defaultValue={String(field.value)}
-                        onValueChange={(value) => {field.onChange(value) 
-                          console.log(value)}}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          console.log(value);
+                        }}
                         placeholder="Select Category"
                         items={(categories ?? []).map((c: CategoryProps) => ({
                           label: c.name,

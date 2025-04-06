@@ -8,9 +8,10 @@ import { useFileUploaderStore } from "@/store/file-uploader"
 
 interface UploadProgressProps {
   className?: string
+  showDetailedInfo?: boolean
 }
 
-export function UploadProgress({ className }: UploadProgressProps) {
+export function UploadProgress({ className, showDetailedInfo = false }: UploadProgressProps) {
   const { status, progress, files } = useFileUploaderStore()
 
   if (status !== "uploading") {
@@ -26,6 +27,13 @@ export function UploadProgress({ className }: UploadProgressProps) {
       </div>
       <Progress value={progress} className="h-1" />
 
+      {showDetailedInfo && (
+        <div className="text-xs text-muted-foreground">
+          <p>Uploading: {files.map((f) => f.name).join(", ")}</p>
+          <p>Total size: {(files.reduce((acc, file) => acc + file.size, 0) / (1024 * 1024)).toFixed(2)} MB</p>
+        </div>
+      )}
+
       {/* Screen reader announcement */}
       <div className="sr-only" aria-live="polite">
         Uploading {files.length} files, {progress}% complete
@@ -33,3 +41,4 @@ export function UploadProgress({ className }: UploadProgressProps) {
     </div>
   )
 }
+

@@ -1,27 +1,42 @@
-"use client";
+"use client"
 
-import { useCallback, useState } from "react";
-import { useDropzone, type FileRejection } from "react-dropzone";
-import { Upload } from "lucide-react";
+import { useCallback, useState } from "react"
+import { useDropzone, type FileRejection } from "react-dropzone"
+import { Upload } from "lucide-react"
 
-import { cn } from "@/lib/utils";
-import { useUploadThing } from "@/lib/uploadthing";
-import { useFileUploaderStore } from "@/store/file-uploader";
+import { cn } from "@/lib/utils"
+import { UploadEndpoint, useUploadThing } from "@/lib/uploadthing"
+import { useFileUploaderStore } from "@/store/file-uploader"
+import { getAcceptFromPreset, validationPresets, type FileType } from "@/lib/validation/file-uploader"
 
 interface DropzoneAreaProps {
-  maxFiles?: number;
-  maxSize?: number;
-  disabled?: boolean;
-  className?: string;
-  onChange?: (urls: string[]) => void;
+  fileType?: FileType
+  uploadEndpoint: UploadEndpoint;
+  maxFiles?: number
+  maxSize?: number
+  disabled?: boolean
+  className?: string
+  shape?: "square" | "rounded" | "circle"
+  height?: string
+  onChange?: (urls: string[]) => void
+  customText?: {
+    prompt?: string
+    fileTypes?: string
+    sizeInfo?: string
+  }
 }
 
 export function DropzoneArea({
-  maxFiles = 10,
-  maxSize = 4, // in MB
+  fileType = "image",
+  uploadEndpoint,
+  maxFiles,
+  maxSize,
   disabled = false,
   className,
+  shape = "rounded",
+  height = "auto",
   onChange,
+  customText,
 }: DropzoneAreaProps) {
   const {
     uploadedUrls,
@@ -31,77 +46,86 @@ export function DropzoneArea({
     updateProgress,
     uploadSuccess,
     uploadError,
-  } = useFileUploaderStore();
+  } = useFileUploaderStore()
 
-  const [dragDepth, setDragDepth] = useState(0);
+  const [dragDepth, setDragDepth] = useState(0)
 
-  const { startUpload, isUploading } = useUploadThing("productImage", {
+  const preset = validationPresets[fileType]
+  const effectiveMaxFiles = maxFiles ?? preset.maxFiles
+  const effectiveMaxSize = maxSize ?? preset.maxSize
+
+  const { startUpload, isUploading } = useUploadThing(uploadEndpoint, {
     onClientUploadComplete: (res) => {
-      const newUrls = res.map((file) => file.ufsUrl);
-      uploadSuccess(newUrls);
+      const newUrls = res.map((file) => file.ufsUrl)
+      uploadSuccess(newUrls)
       if (onChange) {
-        onChange([...uploadedUrls, ...newUrls]);
+        onChange([...uploadedUrls, ...newUrls])
       }
     },
     onUploadProgress: (progress) => {
-      updateProgress(progress);
+      updateProgress(progress)
     },
     onUploadError: (error) => {
-      uploadError(error);
+      uploadError(error)
     },
-  });
+  })
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
       if (acceptedFiles.length > 0) {
-        setFiles(acceptedFiles);
-        startUploadState();
-        startUpload(acceptedFiles);
+        setFiles(acceptedFiles)
+        startUploadState()
+        startUpload(acceptedFiles)
       }
 
       if (rejectedFiles.length > 0) {
-        setRejectedFiles(rejectedFiles);
+        setRejectedFiles(rejectedFiles)
       }
     },
-    [setFiles, setRejectedFiles, startUploadState, startUpload]
-  );
+    [setFiles, setRejectedFiles, startUploadState, startUpload],
+  )
 
   const handleDragEnter = useCallback(() => {
-    setDragDepth((prev) => prev + 1);
-  }, []);
+    setDragDepth((prev) => prev + 1)
+  }, [])
 
   const handleDragLeave = useCallback(() => {
-    setDragDepth((prev) => prev - 1);
-  }, []);
+    setDragDepth((prev) => prev - 1)
+  }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp"],
-    },
-    maxSize: maxSize * 1024 * 1024, // Convert MB to bytes
-    maxFiles,
-    disabled: isUploading || disabled || uploadedUrls.length >= maxFiles,
+    accept: getAcceptFromPreset(preset),
+    maxSize: effectiveMaxSize * 1024 * 1024, // Convert MB to bytes
+    maxFiles: effectiveMaxFiles,
+    disabled: isUploading || disabled || uploadedUrls.length >= effectiveMaxFiles,
     onDragEnter: handleDragEnter,
     onDragLeave: handleDragLeave,
-  });
+  })
 
   // isDragActive is true only when dragDepth > 0
-  const isActive = dragDepth > 0 || isDragActive;
+  const isActive = dragDepth > 0 || isDragActive
+
+  // Determine shape classes
+  const shapeClasses = {
+    square: "rounded-md",
+    rounded: "rounded-lg",
+    circle: "rounded-full aspect-square",
+  }
 
   return (
     <div
       {...getRootProps()}
       className={cn(
-        "border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200",
-        isActive
-          ? "border-primary bg-primary/5 scale-[1.02]"
-          : "border-muted-foreground/25 hover:border-primary/50",
+        "border-2 border-dashed p-4 text-center transition-all duration-200",
+        shapeClasses[shape],
+        isActive ? "border-primary bg-primary/5 scale-[1.02]" : "border-muted-foreground/25 hover:border-primary/50",
         disabled && "opacity-50 cursor-not-allowed",
-        uploadedUrls.length >= maxFiles && "opacity-50 cursor-not-allowed",
-        className
+        uploadedUrls.length >= effectiveMaxFiles && "opacity-50 cursor-not-allowed",
+        height !== "auto" && height,
+        className,
       )}
-      aria-disabled={disabled || uploadedUrls.length >= maxFiles}
+      aria-disabled={disabled || uploadedUrls.length >= effectiveMaxFiles}
       role="button"
       tabIndex={0}
       aria-label="Upload files by dropping them here or click to select"
@@ -111,20 +135,25 @@ export function DropzoneArea({
         <Upload className="size-7 mb-2 text-muted-foreground" />
 
         <p className="font-medium">
-          {uploadedUrls.length >= maxFiles
+          {uploadedUrls.length >= effectiveMaxFiles
             ? "Maximum number of files reached"
-            : "Drag & drop files here, or click to select files"}
+            : customText?.prompt || "Drag & drop files here, or click to select files"}
         </p>
-        <p>Image files only (JPG, PNG, GIF, WEBP)</p>
         <p>
-          Max {maxSize}MB per file • Up to {maxFiles} files
+          {customText?.fileTypes ||
+            `${fileType.charAt(0).toUpperCase() + fileType.slice(1)} files only (${preset.acceptedFileTypes.join(", ")})`}
+        </p>
+        <p>
+          {customText?.sizeInfo ||
+            `Max ${effectiveMaxSize}MB per file • Up to ${effectiveMaxFiles} file${effectiveMaxFiles > 1 ? "s" : ""}`}
         </p>
         {uploadedUrls.length > 0 && (
           <p>
-            {uploadedUrls.length} of {maxFiles} files uploaded
+            {uploadedUrls.length} of {effectiveMaxFiles} files uploaded
           </p>
         )}
       </div>
     </div>
-  );
+  )
 }
+
