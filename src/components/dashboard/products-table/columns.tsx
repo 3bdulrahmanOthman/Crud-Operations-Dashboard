@@ -6,6 +6,8 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import LongText from "@/components/long-text";
 import Image from "next/image";
 import { RowActions } from "./row-actions";
+import React from 'react'
+
 
 export const columns: ColumnDef<ProductProps>[] = [
   {

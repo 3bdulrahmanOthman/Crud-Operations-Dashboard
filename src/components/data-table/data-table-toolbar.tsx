@@ -1,15 +1,13 @@
 "use client";
 
-import type React from "react";
-import type { Table } from "@tanstack/react-table";
-
+import { Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Icons } from "@/components/icons";
+import React, { useCallback, useState } from "react";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { Options } from "@/types";
-import { Icons } from "../icons";
-import { cn } from "@/lib/utils";
 
 interface FilterOption {
   id: string;
@@ -17,51 +15,44 @@ interface FilterOption {
   options: Options[];
 }
 
-interface DataTableToolbarProps<TData>
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableToolbarProps<TData> {
   table: Table<TData>;
-  searchColumn?: string[]; // Supports multiple search columns
-  filterOptions?: FilterOption[];
+  searchColumns?: string[]; 
+  filterOptions?: FilterOption[]; 
+  children?: React.ReactNode;
 }
 
 export function DataTableToolbar<TData>({
   table,
-  searchColumn = ["name"], // Default to "name" column
+  searchColumns = [],
   filterOptions = [],
   children,
-  className,
-  ...props
 }: DataTableToolbarProps<TData>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
+  const [searchTerm, setSearchTerm] = useState("");
+  const isFiltered = table.getState().globalFilter || table.getState().columnFilters.length > 0;
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue = event.target.value.trim().toLowerCase();
+  const onReset = useCallback(() => {
+    setSearchTerm("");
+    table.setGlobalFilter(undefined);
+    table.resetColumnFilters();
+  }, [table]);
 
-    // Apply filter to each searchable column
-    table.getAllColumns().forEach((column) => {
-      if (searchColumn.includes(column.id)) {
-        column.setFilterValue(searchValue || undefined);
-      }
-    });
-  };
+  const onSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    table.setGlobalFilter(value);
+  }, [table]);
+  
 
   return (
-    <div
-      role="toolbar"
-      aria-orientation="horizontal"
-      className={cn(
-        "flex w-full items-start justify-between gap-2 overflow-auto",
-        className
-      )}
-      {...props}
-    >
-      <div className="flex flex-1 flex-wrap items-center gap-2">
-        {/* Search Input (for multiple columns) */}
-        {searchColumn.some((col) => table.getColumn(col)) && (
+    <div className="flex items-center justify-between">
+      <div className="flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2">
+        {/* Multi-Column Search Input */}
+        {searchColumns.length > 0 && (
           <Input
-            placeholder={`Search ${searchColumn.join(", ")}...`}
-            onChange={handleSearchChange}
-            className="h-8 w-40 lg:w-64"
+            placeholder={`Search ${searchColumns.join(", ")}`}
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="h-8 w-[150px] lg:w-[250px]"
           />
         )}
 
@@ -84,7 +75,7 @@ export function DataTableToolbar<TData>({
         {isFiltered && (
           <Button
             variant="ghost"
-            onClick={() => table.resetColumnFilters()}
+            onClick={onReset}
             className="h-8 px-2 lg:px-3"
           >
             Reset
@@ -92,7 +83,6 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-
       <div className="flex flex-wrap items-center justify-end gap-2">
         {children}
         <DataTableViewOptions table={table} />

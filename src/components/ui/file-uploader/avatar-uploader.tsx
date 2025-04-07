@@ -8,7 +8,7 @@ import { ErrorDisplay } from "./error-display"
 import { UploadProgress } from "./upload-progress"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { Icons } from "@/components/icons"
 
 interface AvatarUploaderProps {
   onChange: (url: string) => void
@@ -17,6 +17,7 @@ interface AvatarUploaderProps {
   disabled?: boolean
   className?: string
   size?: "sm" | "md" | "lg" | "xl"
+  shape?: "square" | "rounded" | "circle";
 }
 
 export function AvatarUploader({
@@ -26,6 +27,7 @@ export function AvatarUploader({
   disabled = false,
   className,
   size = "md",
+  shape = "circle",
 }: AvatarUploaderProps) {
   const { uploadedUrls, setUploadedUrls, removeFile, reset } = useFileUploaderStore()
 
@@ -74,22 +76,23 @@ export function AvatarUploader({
           maxSize={maxSize}
           disabled={disabled}
           onChange={handleChange}
-          shape="circle"
+          shape={shape}
           height={sizeClasses[size]}
           customText={{
             prompt: "Upload avatar",
-            fileTypes: "Image files only (JPG, PNG, GIF, WEBP)",
-            sizeInfo: `Max ${maxSize}MB`,
+            fileTypes: "empty", //"Image files only (JPG, PNG, GIF, WEBP)",
+            sizeInfo: "empty",//`Max ${maxSize}MB`,
           }}
+          className={cn("mx-auto", sizeClasses[size])}
         />
       ) : (
-        <div className="relative group">
+        <div className={cn("relative group mx-auto", sizeClasses[size])}>
           <Image
             src={uploadedUrls[0] || "/placeholder.svg"}
             alt="Avatar"
             width={size === "sm" ? 64 : size === "md" ? 96 : size === "lg" ? 128 : 160}
             height={size === "sm" ? 64 : size === "md" ? 96 : size === "lg" ? 128 : 160}
-            className={cn("rounded-full object-cover", sizeClasses[size], disabled && "opacity-50")}
+            className={cn("rounded-full border-2 border-dashed object-cover", sizeClasses[size], disabled && "opacity-50")}
             onError={(e) => {
               e.currentTarget.src = "/placeholder.svg?height=100&width=100"
             }}
@@ -100,11 +103,11 @@ export function AvatarUploader({
               type="button"
               variant="destructive"
               size="icon"
-              className="absolute bottom-0 right-0 size-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute bottom-0 right-0 size-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
               onClick={handleRemove}
               aria-label="Remove avatar"
             >
-              <Trash2 className="size-4" aria-hidden="true" />
+              <Icons.trash className="size-4" aria-hidden="true" />
               <span className="sr-only">Remove avatar</span>
             </Button>
           )}

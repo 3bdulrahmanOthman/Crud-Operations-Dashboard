@@ -36,6 +36,16 @@ export const dashboardConfig: DashboardConfig = {
         },
       ],
     },
+    {
+      title: "Users",
+      items: [
+        {
+          title: "Users",
+          path: "/dashboard/users",
+          icon: "userGroup",
+        },
+      ],
+    },
   ],
 };
 

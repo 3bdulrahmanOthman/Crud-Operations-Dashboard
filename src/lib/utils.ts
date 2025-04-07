@@ -3,6 +3,10 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { LucideProps } from "lucide-react";
 import { createElement } from "react";
+import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { UserProps } from "@/types";
+import { roleStyles } from "./styles";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -16,6 +20,14 @@ export const RenderIcon = ({
 } & LucideProps) => {
   const Icon = icon ? Icons[icon] : undefined;
   return Icon ? createElement(Icon, props) : null;
+};
+
+export const RoleBadge: React.FC<{ role: UserProps["role"] }> = ({ role }) => {
+  return React.createElement(
+    Badge,
+    { className: roleStyles[role] },
+    role.charAt(0).toUpperCase() + role.slice(1)
+  );
 };
 
 export function formatPrice(
@@ -97,5 +109,3 @@ export function isMacOs() {
 
   return window.navigator.userAgent.includes("Mac");
 }
-
-

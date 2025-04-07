@@ -4,7 +4,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -23,57 +22,53 @@ import {
 } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Icons } from "@/components/icons";
-import { CategoryProps, ProductProps } from "@/types";
+import { UserProps } from "@/types";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/handle-error";
-import { productSchema } from "@/lib/validation/products";
 import { SelectDropdown } from "@/components/select-dropdown";
 import { useForm } from "react-hook-form";
-import { FileUploader } from "@/components/ui/file-uploader";
+import { AvatarUploader } from "@/components/ui/file-uploader/avatar-uploader";
+import { userSchema } from "@/lib/validation/user";
+import { PasswordInput } from "@/components/password-input";
 
-export type ProductFormValues = z.infer<typeof productSchema>;
+export type UserFormValues = z.infer<typeof userSchema>;
 
 interface ManageDataEntriesProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product?: ProductProps;
-  categories?: CategoryProps[];
-  onAction: (values: ProductFormValues) => Promise<void>;
+  user?: UserProps;
+  onAction: (values: UserFormValues) => Promise<void>;
   loading?: boolean;
 }
 
 export function ManageDataEntries({
   open,
   onOpenChange,
-  product,
-  categories,
+  user,
   onAction,
   loading,
 }: ManageDataEntriesProps) {
-  const isEdit = !!product;
+  const isEdit = !!user;
 
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(userSchema),
     defaultValues: isEdit
-      ? {
-          ...product,
-          categoryId: product.category?.id,
-          isEdit,
-        }
+      ? { ...user, isEdit }
       : {
-          title: "",
-          price: 0,
-          description: "",
-          categoryId: 1,
-          images: [],
+          name: "",
+          email: "",
+          password: "",
+          avatar: "",
+          role: "customer",
           isEdit,
         },
   });
 
-  const onSubmit = async (values: ProductFormValues) => {
+  const onSubmit = (values: UserFormValues) => {
+    console.log("submit", values);
     toast.promise(onAction(values), {
-      loading: isEdit ? "Updating product..." : "Adding product...",
-      success: () => `Product ${isEdit ? "updated" : "added"} successfully!`,
+      loading: isEdit ? "Updating user..." : "Adding user...",
+      success: () => `User ${isEdit ? "updated" : "added"} successfully!`,
       error: (error) => getErrorMessage(error),
     });
     form.reset();
@@ -81,48 +76,36 @@ export function ManageDataEntries({
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(state) => {
-        form.reset();
-        onOpenChange(state);
-      }}
-    >
+    <Dialog open={open} onOpenChange={(state) => onOpenChange(state)}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Edit Product" : "Add New Product"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Edit User" : "Add New User"}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Update the product details below. "
-              : "Fill in the details to add a new product. "}
-            Click save when you&apos;re done.
+              ? "Update the user details below."
+              : "Fill in the details to add a new user."}
           </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh] pr-4">
           <Form {...form}>
             <form
-              id="product-form"
+              id="user-form"
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4 p-0.5"
             >
-              {/* Images */}
+              {/* Avatar */}
               <FormField
                 control={form.control}
-                name="images"
+                name="avatar"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Images</FormLabel>
+                  <FormItem className="flex flex-col space-y-2">
+                    <FormLabel className="sr-only">Avatar</FormLabel>
                     <FormControl>
-                      <FileUploader
+                      <AvatarUploader
                         onChange={field.onChange}
                         value={field.value}
-                        uploadEndpoint="productImage"
-                        maxFiles={4}
-                        maxSize={1}
-                        previewLayout="grid"
+                        size="lg"
                       />
                     </FormControl>
                     <FormMessage />
@@ -130,54 +113,51 @@ export function ManageDataEntries({
                 )}
               />
 
-              {/* Title */}
+              {/* First Name */}
               <FormField
                 control={form.control}
-                name="title"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter product title" {...field} />
+                      <Input placeholder="Enter name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Price */}
+              {/* Password */}
+              {!isEdit && (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <PasswordInput
+                          placeholder="Enter password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {/* Email */}
               <FormField
                 control={form.control}
-                name="price"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value || "0"))
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Description */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter product description"
+                        type="email"
+                        placeholder="Enter email"
                         {...field}
                       />
                     </FormControl>
@@ -186,13 +166,12 @@ export function ManageDataEntries({
                 )}
               />
 
-              {/* Category */}
               <FormField
                 control={form.control}
-                name="categoryId"
+                name="role"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Role</FormLabel>
                     <FormControl>
                       <SelectDropdown
                         className="w-full"
@@ -202,9 +181,9 @@ export function ManageDataEntries({
                           console.log(value);
                         }}
                         placeholder="Select Category"
-                        items={(categories ?? []).map((c: CategoryProps) => ({
-                          label: c.name,
-                          value: String(c.id),
+                        items={["customer", "admin"].map((r) => ({
+                          label: r.charAt(0).toUpperCase() + r.slice(1),
+                          value: r,
                         }))}
                       />
                     </FormControl>
@@ -224,11 +203,11 @@ export function ManageDataEntries({
           >
             Cancel
           </Button>
-          <Button type="submit" form="product-form" disabled={loading}>
+          <Button type="submit" form="user-form" disabled={loading}>
             {loading ? (
-              <Icons.loader className="mr-2 h-4 w-4 animate-spin" />
+              <Icons.loader className="mr-2 size-4 animate-spin" />
             ) : null}
-            {isEdit ? "Update Product" : "Save Product"}
+            {isEdit ? "Update User" : "Save User"}
           </Button>
         </DialogFooter>
       </DialogContent>

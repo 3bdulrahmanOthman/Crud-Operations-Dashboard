@@ -9,43 +9,32 @@ import {
 import { exportTableToCSV } from "@/lib/export";
 import { memo, useEffect } from "react";
 import { Icons } from "@/components/icons";
-import { useProductStore } from "@/store/products";
 import { useDialogStore } from "@/store/dialogs";
 import { columns } from "./columns";
 import { Dialogs } from "./dialogs";
-import { useCategoryStore } from "@/store/categories";
-import { CategoryProps } from "@/types";
+import { useUserStore } from "@/store/users";
 import { useUniqueOptions } from "@/hooks/useUniqueOptions";
+import { UserProps } from "@/types";
 
-export const ProductsTable = memo(() => {
+export const UsersTable = memo(() => {
   const {
-    products,
-    fetchProducts,
+    users,
+    fetchUsers,
     isLoading,
-    productsByCategory,
-    fetchProductsByCategory,
-  } = useProductStore();
-  const { categories, fetchCategories } = useCategoryStore();
+  } = useUserStore();
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, [fetchCategories, fetchProducts]);
+    fetchUsers();
+  }, [fetchUsers]);
 
-  useEffect(() => {
-    categories.forEach((category) => {
-      fetchProductsByCategory(category.id);
-    });
-  }, [categories, fetchProductsByCategory]);
-
-  const uniqueCategoryOptions = useUniqueOptions<CategoryProps>(
-    categories,
-    (c: CategoryProps) =>
-      c
+  const uniqueRoleOptions = useUniqueOptions<UserProps>(
+    users,
+    (u) =>
+      u?.role
         ? {
-            label: c.name,
-            value: c.id.toString(),
-            count: productsByCategory[c.id]?.length || 0,
+            label: u.role.charAt(0).toUpperCase() + u.role.slice(1),
+            value: u.role,
+            count: users.filter((user) => user.role === u.role).length,
           }
         : null
   );
@@ -58,30 +47,28 @@ export const ProductsTable = memo(() => {
     <>
       <DataTable
         columns={columns}
-        data={products}
+        data={users}
         toolbar={(table) => (
           <DataTableToolbar
             table={table}
-            searchColumns={["title", "description", "slug"]}
-            filterOptions={
-              products && [
-                {
-                  id: "category",
-                  title: "Category",
-                  options: uniqueCategoryOptions,
-                },
-              ]
-            }
+            searchColumns={["name", "email"]}
+            filterOptions={[
+              {
+                id: "role",
+                title: "Role",
+                options: uniqueRoleOptions,
+              },
+            ]}
           >
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
                 useDialogStore.getState().setOpen("add");
-                console.log("Add dialog opened");
+                console.log("➕ Add user dialog triggered");
               }}
             >
-              <Icons.add />
+              <Icons.add className="mr-2 h-4 w-4" />
               Add
             </Button>
 
@@ -90,12 +77,12 @@ export const ProductsTable = memo(() => {
               size="sm"
               onClick={() =>
                 exportTableToCSV(table, {
-                  filename: "Products",
+                  filename: "Users",
                   excludeColumns: ["select", "actions"],
                 })
               }
             >
-              <Icons.download />
+              <Icons.download className="mr-2 h-4 w-4" />
               Export
             </Button>
           </DataTableToolbar>
@@ -106,4 +93,4 @@ export const ProductsTable = memo(() => {
   );
 });
 
-ProductsTable.displayName = "ProductsTable";
+UsersTable.displayName = "UsersTable";

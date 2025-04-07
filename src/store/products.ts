@@ -56,6 +56,7 @@ export const useProductStore = create<ProductState>()(
       } catch (error) {
         console.error("❌ Error adding product:", error);
         set({ isLoading: false });
+        throw error;
       }
     },
 
@@ -71,6 +72,7 @@ export const useProductStore = create<ProductState>()(
       } catch (error) {
         console.error("❌ Error updating product:", error);
         set({ isLoading: false });
+        throw error;
       }
     },
 
@@ -85,6 +87,7 @@ export const useProductStore = create<ProductState>()(
       } catch (error) {
         console.error("❌ Error deleting product:", error);
         set({ isLoading: false });
+        throw error;
       }
     },
   }))

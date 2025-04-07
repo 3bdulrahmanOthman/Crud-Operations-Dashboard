@@ -10,7 +10,7 @@
 
   export function Dialogs() {
     const { open, data, close, setOpen } = useDialogStore();
-    const { deleteProduct, updateProduct, addProduct } = useProductStore();
+    const { deleteProduct, updateProduct, addProduct, isLoading } = useProductStore();
     const { categories } = useCategoryStore();
 
     if (!open) return null;
@@ -21,6 +21,7 @@
           open={open === "edit" || open === "add"}
           onOpenChange={close}
           product={data || undefined}
+          loading={isLoading}
           categories={categories || undefined}
           onAction={async (values) => {
             if (open === "edit" && data) {

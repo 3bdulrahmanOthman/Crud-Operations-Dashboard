@@ -49,8 +49,9 @@ interface UserProps {
   id: string;
   name: string;
   email: string;
-  role: string;
-  image: string;
+  role: 'customer' | 'admin';
+  avatar: string;
+  password?: string;
   createdAt?: string;
   updatedAt?: string;
 }
