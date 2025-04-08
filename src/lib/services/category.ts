@@ -11,4 +11,18 @@ export const CategoryService = {
     const { data } = await api.get(`/categories/${id}`);
     return data;
   },
+
+  async create(category: Omit<CategoryProps, "id" | "slug">): Promise<CategoryProps> {
+    const { data } = await api.post("/categories", category);
+    return data;
+  },
+
+  async update(id: CategoryProps["id"], category: Partial<CategoryProps>): Promise<CategoryProps> {
+    const { data } = await api.put(`/categories/${id}`, category);
+    return data;
+  },
+
+  async delete(id: CategoryProps["id"]): Promise<void> {
+    await api.delete(`/categories/${id}`);
+  },
 };

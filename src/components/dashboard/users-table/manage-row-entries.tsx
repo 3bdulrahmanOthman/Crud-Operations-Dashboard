@@ -65,7 +65,6 @@ export function ManageDataEntries({
   });
 
   const onSubmit = (values: UserFormValues) => {
-    console.log("submit", values);
     toast.promise(onAction(values), {
       loading: isEdit ? "Updating user..." : "Adding user...",
       success: () => `User ${isEdit ? "updated" : "added"} successfully!`,

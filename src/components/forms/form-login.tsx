@@ -1,16 +1,20 @@
 "use client";
 
-import { useTransition } from "react";
+import { useCallback, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
+
 import { loginSchema } from "@/lib/validation/auth";
+import { showErrorToast } from "@/lib/handle-error";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/password-input";
 import {
   Card,
   CardContent,
@@ -26,16 +30,14 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Icons } from "../icons";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { PasswordInput } from "../password-input";
-import { signIn } from "next-auth/react";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -45,22 +47,28 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    startTransition(() => {
-      toast.promise(signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      }), {
-        loading: "Logging in...",
-        success: () => {
-          router.replace("/dashboard");
-          return "Login successful!";
-        },
-        error: "Invalid email or password",
+  const onSubmit = useCallback(
+    (data: LoginFormValues) => {
+      startTransition(async () => {
+        try {
+          const response = await signIn("credentials", {
+            email: data.email,
+            password: data.password,
+            redirect: false,
+          });
+
+          if (response?.ok) {
+            toast.success("Login successful!");
+            router.replace("/dashboard");
+          }
+        } catch (error) {
+          console.error("Login error:", error);
+          showErrorToast(error);
+        }
       });
-    });
-  };
+    },
+    [router]
+  );
 
   return (
     <Card className="w-full">
@@ -70,6 +78,7 @@ export default function LoginForm() {
           Enter your credentials to access the dashboard
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -101,7 +110,7 @@ export default function LoginForm() {
                   <FormControl>
                     <PasswordInput
                       id="password"
-                      placeholder="123@abc!"
+                      placeholder="••••••••"
                       {...field}
                     />
                   </FormControl>
@@ -110,11 +119,15 @@ export default function LoginForm() {
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? (
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting || isPending}
+            >
+              {form.formState.isSubmitting || isPending ? (
                 <>
                   <Icons.spinner className="mr-2 size-4 animate-spin" />
-                  <span>Login...</span>
+                  <span>Logging in...</span>
                 </>
               ) : (
                 "Login"
@@ -123,6 +136,7 @@ export default function LoginForm() {
           </form>
         </Form>
       </CardContent>
+
       <CardFooter className="flex justify-center">
         <Alert>
           <Icons.user className="size-4" />
@@ -134,7 +148,6 @@ export default function LoginForm() {
                 Mail: <strong>admin@mail.com</strong>
               </span>
             </div>
-
             <div className="flex items-center gap-2">
               <Icons.lock className="size-4 text-muted" />
               <span>

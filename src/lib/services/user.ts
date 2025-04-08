@@ -26,9 +26,9 @@ export const UserService = {
     await api.delete(`/users/${id}`);
   },
 
-  async checkEmail(email: UserProps["email"]): Promise<UserProps> {
+  async checkEmail(email: UserProps["email"]): Promise<boolean> {
     const { data } = await api.post(`/users/is-available`, { email });
-    return data?.isAvailable;
+    return data.isAvailable;
   },
 
 };

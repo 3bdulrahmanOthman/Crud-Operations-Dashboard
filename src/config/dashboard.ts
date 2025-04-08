@@ -34,6 +34,11 @@ export const dashboardConfig: DashboardConfig = {
           path: "/dashboard/products",
           icon: "product",
         },
+        {
+          title: "Categories",
+          path: "/dashboard/categories",
+          icon: "boxes",
+        },
       ],
     },
     {

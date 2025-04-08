@@ -12,63 +12,38 @@ import { Icons } from "@/components/icons";
 import { useDialogStore } from "@/store/dialogs";
 import { columns } from "./columns";
 import { Dialogs } from "./dialogs";
-import { useUserStore } from "@/store/users";
-import { useUniqueOptions } from "@/hooks/useUniqueOptions";
-import { UserProps } from "@/types";
+import { useCategoryStore } from "@/store/categories";
 
-export const UsersTable = memo(() => {
-  const {
-    users,
-    fetchUsers,
-    isLoading,
-  } = useUserStore();
+export const CategoriesTable = memo(() => {
+  const { categories, fetchCategories, isLoading } = useCategoryStore();
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  const uniqueRoleOptions = useUniqueOptions<UserProps>(
-    users,
-    (u) =>
-      u?.role
-        ? {
-            label: u.role.charAt(0).toUpperCase() + u.role.slice(1),
-            value: u.role,
-            count: users.filter((user) => user.role === u.role).length,
-          }
-        : null
-  );
+    fetchCategories();
+  }, [fetchCategories]);
 
   if (isLoading) {
-    return <DataTableSkeleton columnCount={6} />;
+    return <DataTableSkeleton columnCount={4} />;
   }
 
   return (
     <>
       <DataTable
         columns={columns}
-        data={users}
+        data={categories}
         toolbar={(table) => (
           <DataTableToolbar
             table={table}
-            searchColumns={["name", "email"]}
-            filterOptions={[
-              {
-                id: "role",
-                title: "Role",
-                options: uniqueRoleOptions,
-              },
-            ]}
+            searchColumns={["name", "slug"]}
           >
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
                 useDialogStore.getState().setOpen("add");
-                console.log("➕ Add user dialog triggered");
+                console.log("Add dialog opened");
               }}
             >
-              <Icons.add className="mr-2 size-4" />
+              <Icons.add />
               Add
             </Button>
 
@@ -77,12 +52,12 @@ export const UsersTable = memo(() => {
               size="sm"
               onClick={() =>
                 exportTableToCSV(table, {
-                  filename: "Users",
+                  filename: "Categories",
                   excludeColumns: ["select", "actions"],
                 })
               }
             >
-              <Icons.download className="mr-2 h-4 w-4" />
+              <Icons.download />
               Export
             </Button>
           </DataTableToolbar>
@@ -93,4 +68,4 @@ export const UsersTable = memo(() => {
   );
 });
 
-UsersTable.displayName = "UsersTable";
+CategoriesTable.displayName = "CategoriesTable";

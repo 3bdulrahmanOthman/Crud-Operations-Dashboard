@@ -32,7 +32,7 @@ export interface FileUploaderProps {
 
 export function FileUploader({
   onChange,
-  value = [],
+  value,
   fileType = "image",
   uploadEndpoint,
   maxFiles,

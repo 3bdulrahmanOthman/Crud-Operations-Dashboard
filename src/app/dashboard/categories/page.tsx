@@ -1,13 +1,13 @@
-import { ProductsTable } from "@/components/dashboard/products-table";
+import { CategoriesTable } from "@/components/dashboard/category-table";
 import PageHeader from "@/components/page-header";
 import { Shell } from "@/components/shell";
 
 export const metadata = {
-  title: "Products",
-  description: "Manage your product catalog and inventory.",
+  title: "Categories",
+  description: "Manage your product categories.",
 };
 
-export default function Products() {
+export default function Category() {
   
   return (
     <Shell variant="sidebar">
@@ -15,7 +15,7 @@ export default function Products() {
         title={metadata.title}
         description={metadata.description}
       />
-        <ProductsTable />
+        <CategoriesTable />
     </Shell>
   );
 }
