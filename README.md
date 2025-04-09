@@ -45,11 +45,25 @@ This project was developed using the latest technologies to ensure scalability, 
 Create a `.env.local` file and add the required environment variables:  
 ```env
 NEXT_PUBLIC_API_URL="https://api.escuelajs.co/api/v1"
+
+# Next Auth
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="secretkey"
-UPLOADTHING_TOKEN='secrettoken'
-UPSTASH_REDIS_REST_URL="https://"
-UPSTASH_REDIS_REST_TOKEN="secrettoken"
+NEXTAUTH_SECRET=""
+
+# Github Provider
+GITHUB_ID=""
+GITHUB_SECRET=""
+
+# Google Provider
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+
+# Uploadthing 
+UPLOADTHING_TOKEN=""
+
+# Upstash
+UPSTASH_REDIS_REST_URL=""
+UPSTASH_REDIS_REST_TOKEN=""
 ```
 
 ## 📜 **License**  

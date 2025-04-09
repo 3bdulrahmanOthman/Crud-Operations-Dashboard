@@ -2,13 +2,12 @@
 
 import { useCallback, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import { signInSchema } from "@/lib/validation/auth";
+import { signUpSchema } from "@/lib/validation/auth";
 import { showErrorToast } from "@/lib/handle-error";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -33,52 +32,58 @@ import {
 import { Icons } from "../icons";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { signIn } from "next-auth/react";
+import { useUserStore } from "@/store/users";
 
-type LoginFormValues = z.infer<typeof signInSchema>;
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
-export default function SignInForm() {
+export default function SignUpForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { addUser } = useUserStore();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(signInSchema),
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
-      email: "admin@mail.com",
-      password: "admin123",
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
     mode: "onSubmit",
   });
 
   const onSubmit = useCallback(
-    (data: LoginFormValues) => {
+    async (data: SignUpFormValues) => {
+      const { firstName, lastName, email, password } = data;
+
       startTransition(async () => {
         try {
-          const response = await signIn("credentials", {
-            email: data.email,
-            password: data.password,
-            redirect: false,
+          await addUser({
+            email,
+            password,
+            name: `${firstName} ${lastName}`.trim(),
+            role: "customer",
+            avatar: "https://imgur.com/tEJM6Ag",
           });
 
-          if (response?.ok) {
-            toast.success("Login successful!");
-            router.replace("/dashboard");
-          }
+          toast.success("Account created successfully");
+          router.replace("/signin");
         } catch (error) {
-          console.error("Login error:", error);
+          console.error("[Signup Error]:", error);
           showErrorToast(error);
         }
       });
     },
-    [router]
+    [addUser, router]
   );
 
   return (
     <Card className="w-full border-border/10">
       <CardHeader className="flex flex-col items-center">
-        <CardTitle className="text-lg">Sign in to your account</CardTitle>
-        <CardDescription>
-          Welcome back! Please sign in to continue
-        </CardDescription>
+        <CardTitle className="text-lg">Sign up for an account</CardTitle>
+        <CardDescription>Create an account to get started</CardDescription>
 
         <div className="w-full grid sm:grid-cols-2 gap-4 mt-6">
           <Button
@@ -136,6 +141,46 @@ export default function SignInForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <Label htmlFor="firstName">First Name</Label>
+                    <FormControl>
+                      <Input
+                        id="firstName"
+                        placeholder="John"
+                        autoComplete="given-name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <FormControl>
+                      <Input
+                        id="lastName"
+                        placeholder="Doe"
+                        autoComplete="family-name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="email"
@@ -175,6 +220,25 @@ export default function SignInForm() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <FormControl>
+                    <PasswordInput
+                      id="confirmPassword"
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <Button
               type="submit"
               className="w-full"
@@ -183,10 +247,10 @@ export default function SignInForm() {
               {form.formState.isSubmitting || isPending ? (
                 <>
                   <Icons.spinner className="mr-2 size-4 animate-spin" />
-                  <span>Logging in...</span>
+                  <span>Signing up...</span>
                 </>
               ) : (
-                "Login"
+                "Sign Up"
               )}
             </Button>
           </form>
@@ -194,14 +258,12 @@ export default function SignInForm() {
       </CardContent>
 
       <CardFooter className="flex justify-center text-sm">
-        <span className="text-muted-foreground">
-          Don&apos;t have an account?
-        </span>
+        <span className="text-muted-foreground">Already have an account?</span>
         <Link
-          href="/signup"
+          href="/signin"
           className={cn(buttonVariants({ variant: "link", size: "sm" }), "p-1")}
         >
-          Sign Up
+          Sign In
         </Link>
       </CardFooter>
     </Card>

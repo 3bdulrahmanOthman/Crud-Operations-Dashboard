@@ -1,5 +1,7 @@
 import { AuthOptions, DefaultSession, Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import { loginUser } from "@/lib/services/auth";
 import { JWT } from "next-auth/jwt";
 
@@ -28,6 +30,14 @@ declare module "next-auth/jwt" {
 
 export const authOptions: AuthOptions = {
   providers: [
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -83,8 +93,9 @@ export const authOptions: AuthOptions = {
     },
   },
   pages: {
-    signIn: '/signin',
-    error: '/signin'
+    signIn: "/signin",
+    signOut: "/",
+    error: "/signin",
   },
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt", maxAge: 4 * 60 * 60, updateAge: 15 * 60 },

@@ -1,11 +1,11 @@
-import LoginForm from '@/components/forms/form-login';
+import type { Metadata } from "next";
+import SignInForm from "@/components/forms/form-login";
 
-export default async function Signin() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-muted/40">
-      <div className="w-full max-w-md">
-        <LoginForm />
-      </div>
-    </main>
-  );
+export const metadata: Metadata = {
+  title: "Authentication | Sign In",
+  description: 'Sign In page for authentication.',
+};
+
+export default async function SignIn() {
+  return <SignInForm />;
 }
