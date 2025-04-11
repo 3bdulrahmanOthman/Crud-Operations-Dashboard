@@ -1,21 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { Shell } from "@/components/shell";
-import { getRepoStars } from '@/lib/services/github';
+import { GitHubStarsButton } from "@/components/animate-ui/github-stars-button";
 
-export default async function AuthenticationLayout({
+export default function AuthenticationLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const stars = await getRepoStars(); 
-
   return (
     <Shell
       variant="centered"
-      className="relative mx-auto md:p-0 lg:grid lg:max-w-none lg:grid-cols-2"
+      className="relative h-full mx-auto md:p-0 lg:grid lg:max-w-none lg:grid-cols-2 "
     >
       {/* Left Panel */}
       <div className="relative hidden h-full flex-col bg-muted p-10 lg:flex">
@@ -47,21 +44,12 @@ export default async function AuthenticationLayout({
       </div>
 
       {/* Right Panel */}
-      <div className="flex w-full flex-col max-w-md items-center justify-center space-y-6 mx-auto">
-        <Link
-          className={cn("group inline-flex")}
-          target="_blank"
-          href="https://github.com/3bdulrahmanOthman/Crud-Operations-Dashboard"
-        >
-          <div className="flex items-center">
-            <Icons.gitHub className="size-4" />
-            <span className="ml-1 inline">Star on GitHub</span>
-          </div>
-          <div className="ml-2 flex items-center gap-1 text-sm md:flex">
-            <Icons.star className="size-4 group-hover:text-yellow-300 group-hover:fill-current" />
-            <span className="font-medium">{stars}</span>
-          </div>
-        </Link>
+      <div className="flex h-full w-full flex-col max-w-md items-center justify-center space-y-6 mx-auto p-4 sm:p-6">
+        <GitHubStarsButton
+          username="3bdulrahmanOthman"
+          repo="Crud-Operations-Dashboard"
+          className="h-9 has-[>svg]:px-3 rounded-md"
+        />
 
         {children}
 
