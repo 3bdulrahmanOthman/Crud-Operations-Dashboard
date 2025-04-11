@@ -16,27 +16,16 @@ import { useUserStore } from "@/store/users";
 import { useUniqueOptions } from "@/hooks/useUniqueOptions";
 import { UserProps } from "@/types";
 
-export const UsersTable = memo(() => {
-  const {
-    users,
-    fetchUsers,
-    isLoading,
-  } = useUserStore();
-
+export const UsersTable = memo(({initialUsers} : {initialUsers : UserProps[]}) => {
+  const { users, isLoading } = useUserStore();
+  
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    useUserStore.setState({ users: initialUsers });
+  }, [initialUsers]);
 
-  const uniqueRoleOptions = useUniqueOptions<UserProps>(
+  const uniqueRoleOptions = useUniqueOptions(
     users,
-    (u) =>
-      u?.role
-        ? {
-            label: u.role.charAt(0).toUpperCase() + u.role.slice(1),
-            value: u.role,
-            count: users.filter((user) => user.role === u.role).length,
-          }
-        : null
+    (u) => u?.role ? { label: u.role.charAt(0).toUpperCase() + u.role.slice(1), value: u.role, count: users.filter((user) => user.role === u.role).length } : null
   );
 
   if (isLoading) {

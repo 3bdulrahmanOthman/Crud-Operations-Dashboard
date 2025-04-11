@@ -139,6 +139,7 @@ export function ManageCategoryEntry({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            aria-label="Close dialog"
           >
             Cancel
           </Button>

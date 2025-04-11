@@ -221,6 +221,7 @@ export function ManageDataEntries({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            aria-label="Close dialog"
           >
             Cancel
           </Button>

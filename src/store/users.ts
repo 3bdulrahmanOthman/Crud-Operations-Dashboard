@@ -6,7 +6,6 @@ import { UserService } from "@/lib/services/user";
 interface UserState {
   users: UserProps[];
   isLoading: boolean;
-  fetchUsers: () => Promise<void>;
   fetchUserById: (id: UserProps["id"]) => Promise<UserProps | null>;
   addUser: (user: Omit<UserProps, "id">) => Promise<void>;
   updateUser: (user: UserProps) => Promise<void>;
@@ -18,21 +17,9 @@ export const useUserStore = create<UserState>()(
     users: [],
     isLoading: false,
 
-    fetchUsers: async () => {
-      set({ isLoading: true });
-      try {
-        const users = await UserService.fetchAll();
-        set({ users, isLoading: false });
-      } catch (error) {
-        console.error("❌ Error fetching users:", error);
-        set({ isLoading: false });
-      }
-    },
-
     fetchUserById: async (id) => {
       try {
-        const user = await UserService.fetchById(id);
-        return user;
+        return await UserService.fetchById(id);
       } catch (error) {
         console.error(`❌ Error fetching user ${id}:`, error);
         return null;

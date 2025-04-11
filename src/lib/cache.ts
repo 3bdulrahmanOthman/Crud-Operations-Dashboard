@@ -1,8 +1,9 @@
-import { unstable_cache, revalidateTag } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 
 export const CACHE_TAGS = {
   PRODUCTS: 'products',
   CATEGORIES: 'categories',
+  USERS: 'users',
   GITHUB: "github",
 } as const;
 
@@ -35,10 +36,10 @@ export async function cachedApiCall<T>(
   return unstable_cache(fetchData, [key], { tags, revalidate })();
 }
 
-export async function invalidateCacheTags(tags: string[]): Promise<void> {
-  try {
-    await Promise.all(tags.map(tag => revalidateTag(tag)));
-  } catch (error) {
-    console.error('❌ Cache invalidation error:', error);
-  }
-}
+// export async function invalidateCacheTags(tags: string[]): Promise<void> {
+//   try {
+//     await Promise.all(tags.map(tag => revalidateTag(tag)));
+//   } catch (error) {
+//     console.error('❌ Cache invalidation error:', error);
+//   }
+// }

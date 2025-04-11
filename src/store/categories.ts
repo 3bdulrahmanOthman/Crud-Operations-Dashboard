@@ -6,7 +6,6 @@ import { immer } from "zustand/middleware/immer";
 interface CategoryState {
   categories: CategoryProps[];
   isLoading: boolean;
-  fetchCategories: () => Promise<void>;
   addCategory: (payload: Omit<CategoryProps, "id" | "slug">) => Promise<void>;
   updateCategory: (id: number, payload: Partial<CategoryProps>) => Promise<void>;
   deleteCategory: (id: number) => Promise<void>;
@@ -16,18 +15,6 @@ export const useCategoryStore = create<CategoryState>()(
   immer((set) => ({
     categories: [],
     isLoading: false,
-
-    fetchCategories: async () => {
-      set({ isLoading: true });
-      try {
-        const categories = await CategoryService.fetchAll();
-        set({ categories });
-      } catch (error) {
-        console.error("❌ Error fetching categories:", error);
-      } finally {
-        set({ isLoading: false });
-      }
-    },
 
     addCategory: async (payload) => {
       try {

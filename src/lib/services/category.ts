@@ -1,10 +1,18 @@
 import { CategoryProps } from "@/types";
 import api from "../axios";
+import { CACHE_TAGS, CACHE_TTL, cachedApiCall } from "../cache";
 
 export const CategoryService = {
   async fetchAll(): Promise<CategoryProps[]> {
-    const { data } = await api.get("/categories");
-    return data;
+    return cachedApiCall(
+      "categories:all",
+      async () => {
+        const { data } = await api.get("/categories");
+        return data;
+      },
+      [CACHE_TAGS.CATEGORIES],
+      CACHE_TTL.MEDIUM
+    );
   },
 
   async fetchById(id: CategoryProps["id"]): Promise<CategoryProps> {

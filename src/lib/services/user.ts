@@ -1,10 +1,19 @@
 import api from "../axios";
 import { UserProps } from "@/types";
+import { cachedApiCall } from "@/lib/cache";
+import { CACHE_TAGS, CACHE_TTL } from "@/lib/cache";
 
 export const UserService = {
   async fetchAll(): Promise<UserProps[]> {
-    const { data } = await api.get("/users");
-    return data;
+    return cachedApiCall(
+      "users:all",
+      async () => {
+        const { data } = await api.get("/users");
+        return data;
+      },
+      [CACHE_TAGS.USERS],
+      CACHE_TTL.MEDIUM
+    );
   },
 
   async fetchById(id: UserProps["id"]): Promise<UserProps> {
@@ -30,5 +39,4 @@ export const UserService = {
     const { data } = await api.post(`/users/is-available`, { email });
     return data.isAvailable;
   },
-
 };

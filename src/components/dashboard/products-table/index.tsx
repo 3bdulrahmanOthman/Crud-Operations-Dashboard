@@ -14,29 +14,26 @@ import { useDialogStore } from "@/store/dialogs";
 import { columns } from "./columns";
 import { Dialogs } from "./dialogs";
 import { useCategoryStore } from "@/store/categories";
-import { CategoryProps } from "@/types";
+import { CategoryProps, ProductProps } from "@/types";
 import { useUniqueOptions } from "@/hooks/useUniqueOptions";
 
-export const ProductsTable = memo(() => {
-  const {
-    products,
-    fetchProducts,
-    isLoading,
-    productsByCategory,
-    fetchProductsByCategory,
-  } = useProductStore();
-  const { categories, fetchCategories } = useCategoryStore();
+interface ProductTableProps {
+  initialProducts: ProductProps[];
+  initialProductsByCategory: Record<string, ProductProps[]>;
+  initialCategories: CategoryProps[];
+}
+
+export const ProductsTable = memo(({initialProducts, initialProductsByCategory, initialCategories}: ProductTableProps) => {
+  const { products, productsByCategory, isLoading } = useProductStore();
+  const { categories } = useCategoryStore();
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, [fetchCategories, fetchProducts]);
-
-  useEffect(() => {
-    categories.forEach((category) => {
-      fetchProductsByCategory(category.id);
+    useProductStore.setState({
+      products: initialProducts,
+      productsByCategory: initialProductsByCategory,
     });
-  }, [categories, fetchProductsByCategory]);
+    useCategoryStore.setState({ categories: initialCategories });
+  }, [initialCategories, initialProducts, initialProductsByCategory]);
 
   const uniqueCategoryOptions = useUniqueOptions<CategoryProps>(
     categories,

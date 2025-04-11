@@ -27,7 +27,7 @@ export const columns: ColumnDef<CategoryProps>[] = [
           alt={row.getValue("name")}
           width={32}
           height={32}
-          className="w-8 h-8 rounded-md object-cover"
+          className="size-8 rounded-md object-cover"
           onError={(e) => {
             e.currentTarget.src = "/placeholder.svg?height=80&width=80"
           }}

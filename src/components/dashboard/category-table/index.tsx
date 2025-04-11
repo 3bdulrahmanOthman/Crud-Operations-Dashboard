@@ -13,59 +13,59 @@ import { useDialogStore } from "@/store/dialogs";
 import { columns } from "./columns";
 import { Dialogs } from "./dialogs";
 import { useCategoryStore } from "@/store/categories";
+import { CategoryProps } from "@/types";
 
-export const CategoriesTable = memo(() => {
-  const { categories, fetchCategories, isLoading } = useCategoryStore();
+export const CategoriesTable = memo(
+  ({ initialCategories }: { initialCategories: CategoryProps[] }) => {
+    const { categories, isLoading } = useCategoryStore();
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    useEffect(() => {
+      useCategoryStore.setState({ categories: initialCategories });
+    }, [initialCategories]);
 
-  if (isLoading) {
-    return <DataTableSkeleton columnCount={4} />;
+    if (isLoading) {
+      return <DataTableSkeleton columnCount={4} />;
+    }
+
+    return (
+      <>
+        <DataTable
+          columns={columns}
+          data={categories}
+          toolbar={(table) => (
+            <DataTableToolbar table={table} searchColumns={["name", "slug"]}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  useDialogStore.getState().setOpen("add");
+                  console.log("Add dialog opened");
+                }}
+              >
+                <Icons.add />
+                Add
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  exportTableToCSV(table, {
+                    filename: "Categories",
+                    excludeColumns: ["select", "actions"],
+                  })
+                }
+              >
+                <Icons.download />
+                Export
+              </Button>
+            </DataTableToolbar>
+          )}
+        />
+        <Dialogs />
+      </>
+    );
   }
-
-  return (
-    <>
-      <DataTable
-        columns={columns}
-        data={categories}
-        toolbar={(table) => (
-          <DataTableToolbar
-            table={table}
-            searchColumns={["name", "slug"]}
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                useDialogStore.getState().setOpen("add");
-                console.log("Add dialog opened");
-              }}
-            >
-              <Icons.add />
-              Add
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                exportTableToCSV(table, {
-                  filename: "Categories",
-                  excludeColumns: ["select", "actions"],
-                })
-              }
-            >
-              <Icons.download />
-              Export
-            </Button>
-          </DataTableToolbar>
-        )}
-      />
-      <Dialogs />
-    </>
-  );
-});
+);
 
 CategoriesTable.displayName = "CategoriesTable";
